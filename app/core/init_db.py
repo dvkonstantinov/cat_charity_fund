@@ -7,6 +7,7 @@ from app.core.config import settings
 from app.core.db import get_async_session
 from app.core.user import get_user_db, get_user_manager
 from app.schemas.user import UserCreate
+from app.core.log import logger
 
 get_async_session_context = contextlib.asynccontextmanager(get_async_session)
 get_user_db_context = contextlib.asynccontextmanager(get_user_db)
@@ -28,7 +29,7 @@ async def create_user(
                         )
                     )
     except UserAlreadyExists:
-        pass
+        logger.info('Попытка добавления существующего пользователя')
 
 
 async def create_first_superuser():
@@ -36,7 +37,6 @@ async def create_first_superuser():
         settings.first_superuser_email is not None and (
             settings.first_superuser_password is not None)
     ):
-        print(1111111111111111111111111111)
         await create_user(
             email=settings.first_superuser_email,
             password=settings.first_superuser_password,

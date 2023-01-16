@@ -1,3 +1,5 @@
+from http import HTTPStatus
+
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -14,7 +16,7 @@ async def check_name_duplicate(
     )
     if project_id is not None:
         raise HTTPException(
-            status_code=400,
+            status_code=HTTPStatus.BAD_REQUEST,
             detail='Проект с таким именем уже существует!',
         )
 
@@ -26,7 +28,7 @@ async def check_project_exist(
     project = await charity_crud.get(project_id, session)
     if project is None:
         raise HTTPException(
-            status_code=404,
+            status_code=HTTPStatus.NOT_FOUND,
             detail='Проект не найден'
         )
     return project
@@ -36,17 +38,16 @@ def check_project_was_donated(project: CharityProject) -> None:
     invested_amount = project.invested_amount
     if invested_amount:
         raise HTTPException(
-            status_code=400,
+            status_code=HTTPStatus.BAD_REQUEST,
             detail='В проект были внесены средства, не подлежит удалению!'
         )
 
 
 def check_project_was_closed(project: CharityProject) -> None:
     close_date = project.close_date
-    print(close_date)
     if close_date is not None:
         raise HTTPException(
-            status_code=400,
+            status_code=HTTPStatus.BAD_REQUEST,
             detail='Закрытый проект нельзя редактировать!'
         )
 
@@ -54,6 +55,6 @@ def check_project_was_closed(project: CharityProject) -> None:
 def check_correct_new_amount(project: CharityProject, new_amount) -> None:
     if new_amount < project.invested_amount:
         raise HTTPException(
-            status_code=400,
+            status_code=HTTPStatus.BAD_REQUEST,
             detail='Нельзя установить требуемую сумму меньше уже вложенной'
         )
